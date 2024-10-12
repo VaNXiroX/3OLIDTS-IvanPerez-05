@@ -1,3 +1,4 @@
+using MySql.Data.MySqlClient;
 namespace _3OLIDTS_IvanPerez_04
 {
     internal static class Program
@@ -12,6 +13,8 @@ namespace _3OLIDTS_IvanPerez_04
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
             Application.Run(new Form1());
+
         }
+
     }
 }

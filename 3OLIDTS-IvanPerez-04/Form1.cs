@@ -12,18 +12,20 @@ using System.IO;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Text.RegularExpressions;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using MySql.Data.MySqlClient;
 
 namespace _3OLIDTS_IvanPerez_04
 {
+   
     public partial class Form1 : Form
     {
+
         public Form1()
         {
             InitializeComponent();
             
 
         }
-
 
         private bool EsEntervalido(string valor)
         {
@@ -47,9 +49,6 @@ namespace _3OLIDTS_IvanPerez_04
             return Regex.IsMatch(valor, @"^[a-zA-Z\s]+$");
         }
 
-
-
-
         private void button1_Click(object sender, EventArgs e)
         {
             string nombres = tbNombre.Text;
@@ -62,7 +61,7 @@ namespace _3OLIDTS_IvanPerez_04
 
             if (EsEntervalido(edad) && EsDecimalvalido(estatura) && EsEnterovalidode10digitos(telefono) && EsTextovalido(nombres) && EsTextovalido(apellidos))
             {
-                string datos = $"Nombres: {nombres}\r\nApellidos: {apellidos}\r\nTelefono. {telefono}\r\nEstatura: {estatura}cm\r\nedad: {edad}años\r\n";
+                string datos = $"Nombres: {nombres}\r\nApellidos: {apellidos}\r\nTelefono. {telefono}\r\nEstatura: {estatura}cm\r\nedad: {edad} aÃ±os\r\n";
 
 
                 string rutaArchivo = "C:\\Users\\pedri\\OneDrive\\Documentos\\DATOS.txt";
@@ -130,9 +129,7 @@ namespace _3OLIDTS_IvanPerez_04
 
       
 
-
-      
-
+        
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -182,6 +179,78 @@ namespace _3OLIDTS_IvanPerez_04
         private void checkBox3_CheckedChanged(object sender, EventArgs e)
         {
 
+        }
+
+        internal class ConexionBD
+        {
+            private string connectionString;
+
+            public ConexionBD()
+            {
+                connectionString = "server= PROMAVANZADA;" +
+                                    "database= world;" +
+                                    "uid=root;" +
+                                    "pwd=1234;";
+            }
+
+            public MySqlConnection GetConnection()
+            {
+                MySqlConnection connection = new MySqlConnection(connectionString);
+                try
+                {
+                    connection.Open();
+                    MessageBox.Show("Conexion establecida");
+                }
+                catch (MySqlException ex)
+                {
+                    MessageBox.Show("Error al conectar a la base de datos: " + ex.Message);
+                }
+                return connection;
+            }
+
+            public void InsertarRegistro(string nombres, string apellidos, string telefono, int edad, decimal estatura, string genero)
+            {
+                MySqlConnection connection = GetConnection();
+                if (connection.State == System.Data.ConnectionState.Open)
+                {
+                    string insertQuery = "INSERT INTO registros (nombres, apellidos, edad, estatura, telefono, genero)" +
+                                     "VALUES (@Nombre, @Apellidos, @Edad, @Estatura, @Telefono, @Genero)";
+
+                    try
+                    {
+                        using (MySqlCommand command = new MySqlCommand(insertQuery, connection))
+                        {
+                            command.Parameters.AddWithValue("@Nombre", nombres);
+                            command.Parameters.AddWithValue("@Apellidos", apellidos);
+                            command.Parameters.AddWithValue("@Telefono", telefono);
+                            command.Parameters.AddWithValue("@Edad", edad);
+                            command.Parameters.AddWithValue("@Estatura", estatura);
+                            command.Parameters.AddWithValue("@Genero", genero);
+
+                            command.ExecuteNonQuery();
+                        }
+
+                        MessageBox.Show("Registro Exitoso");
+                    }
+                    catch (MySqlException ex)
+                    {
+                        MessageBox.Show("Error al insertar registro: " + ex.Message);
+                    }
+                    finally
+                    {
+                        CloseConnection(connection);
+                    }
+                }
+            }
+
+            public void CloseConnection(MySqlConnection connection)
+            {
+                if (connection != null && connection.State == System.Data.ConnectionState.Open)
+                {
+                    connection.Close();
+                    MessageBox.Show("Conexion Cerrada");
+                }
+            }
         }
 
     }
