@@ -48,9 +48,22 @@ namespace _3OLIDTS_IvanPerez_04
         {
             return Regex.IsMatch(valor, @"^[a-zA-Z\s]+$");
         }
-
+       
+        public void GuardarArchivosBD(string nombres, string apellidos, string telefono, string edad, string estatura, string genero)
+        {
+            try
+            {
+                ConexionBD conexionBD = new ConexionBD();
+                conexionBD.InsertarRegistro(nombres, apellidos, telefono, edad, estatura, genero);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al guardar en la base de datos: " + ex.Message);
+            }
+        }
         private void button1_Click(object sender, EventArgs e)
         {
+            
             string nombres = tbNombre.Text;
             string apellidos = tbApellidos.Text;
             string edad = tbEdad.Text;
@@ -111,11 +124,14 @@ namespace _3OLIDTS_IvanPerez_04
 
 
             }
-         
+
+            GuardarArchivosBD(nombres, apellidos, telefono, edad, estatura, genero);
+            
+
 
         }
 
-
+      
         private void button2_Click(object sender, EventArgs e)
         {
             tbNombre.Clear();
@@ -181,77 +197,9 @@ namespace _3OLIDTS_IvanPerez_04
 
         }
 
-        internal class ConexionBD
-        {
-            private string connectionString;
-
-            public ConexionBD()
-            {
-                connectionString = "server= PROMAVANZADA;" +
-                                    "database= world;" +
-                                    "uid=root;" +
-                                    "pwd=1234;";
-            }
-
-            public MySqlConnection GetConnection()
-            {
-                MySqlConnection connection = new MySqlConnection(connectionString);
-                try
-                {
-                    connection.Open();
-                    MessageBox.Show("Conexion establecida");
-                }
-                catch (MySqlException ex)
-                {
-                    MessageBox.Show("Error al conectar a la base de datos: " + ex.Message);
-                }
-                return connection;
-            }
-
-            public void InsertarRegistro(string nombres, string apellidos, string telefono, int edad, decimal estatura, string genero)
-            {
-                MySqlConnection connection = GetConnection();
-                if (connection.State == System.Data.ConnectionState.Open)
-                {
-                    string insertQuery = "INSERT INTO registros (nombres, apellidos, edad, estatura, telefono, genero)" +
-                                     "VALUES (@Nombre, @Apellidos, @Edad, @Estatura, @Telefono, @Genero)";
-
-                    try
-                    {
-                        using (MySqlCommand command = new MySqlCommand(insertQuery, connection))
-                        {
-                            command.Parameters.AddWithValue("@Nombre", nombres);
-                            command.Parameters.AddWithValue("@Apellidos", apellidos);
-                            command.Parameters.AddWithValue("@Telefono", telefono);
-                            command.Parameters.AddWithValue("@Edad", edad);
-                            command.Parameters.AddWithValue("@Estatura", estatura);
-                            command.Parameters.AddWithValue("@Genero", genero);
-
-                            command.ExecuteNonQuery();
-                        }
-
-                        MessageBox.Show("Registro Exitoso");
-                    }
-                    catch (MySqlException ex)
-                    {
-                        MessageBox.Show("Error al insertar registro: " + ex.Message);
-                    }
-                    finally
-                    {
-                        CloseConnection(connection);
-                    }
-                }
-            }
-
-            public void CloseConnection(MySqlConnection connection)
-            {
-                if (connection != null && connection.State == System.Data.ConnectionState.Open)
-                {
-                    connection.Close();
-                    MessageBox.Show("Conexion Cerrada");
-                }
-            }
-        }
+        
+           
+            
 
     }
 }
